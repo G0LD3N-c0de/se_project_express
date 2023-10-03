@@ -22,6 +22,7 @@ const createUser = async (req, res) => {
   try {
     const newUser = new User({
       name: req.body.name,
+      about: req.body.about,
       avatar: req.body.avatar,
     });
 
