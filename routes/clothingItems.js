@@ -4,10 +4,14 @@ const {
   getItems,
   postItem,
   deleteItem,
+  likeItem,
+  unlikeItem,
 } = require("../controllers/clothingItems");
 
-clothingItemsRouter.get("/items", getItems);
-clothingItemsRouter.post("/items", postItem);
-clothingItemsRouter.delete("/items/:itemId", deleteItem);
+clothingItemsRouter.get("/", getItems);
+clothingItemsRouter.post("/", postItem);
+clothingItemsRouter.delete("/:itemId", deleteItem);
+clothingItemsRouter.put("/:itemId/likes", likeItem);
+clothingItemsRouter.delete("/:itemId/likes", unlikeItem);
 
 module.exports = clothingItemsRouter;
