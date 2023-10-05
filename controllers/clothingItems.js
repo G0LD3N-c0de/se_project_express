@@ -13,12 +13,12 @@ const getItems = async (req, res) => {
 };
 
 const postItem = async (req, res) => {
-  console.log(req.user._id);
   try {
     const newItem = new ClothingItem({
       name: req.body.name,
       weather: req.body.weather,
       imageUrl: req.body.imageUrl,
+      owner: req.user._id,
     });
 
     const savedItem = await newItem.save();
