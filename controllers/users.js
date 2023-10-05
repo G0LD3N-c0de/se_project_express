@@ -14,11 +14,17 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).orFail();
+    const user = await User.findById(req.params.userId).orFail();
     res.send(user);
   } catch (error) {
-    if ((error.name = "DocumentNotFoundError")) {
-      res.status(errors.NOT_FOUND).send({ message: "User not found" });
+    if ((error.name = "ValidationError")) {
+      res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "invalid data for request" });
+    } else if (error) {
+      if ((error.name = "documentNotFoundError")) {
+        res.status(errors.NOT_FOUND).send({ message: "No user with that Id" });
+      }
     } else {
       console.error(error);
       res
