@@ -17,16 +17,14 @@ const getUser = async (req, res) => {
     const user = await User.findById(req.params.userId).orFail();
     res.send(user);
   } catch (error) {
-    if ((error.name = "ValidationError")) {
+    if (error.name === "CastError") {
       res
         .status(errors.BAD_REQUEST)
         .send({ message: "invalid data for request" });
-    } else if (error) {
-      if ((error.name = "documentNotFoundError")) {
-        res.status(errors.NOT_FOUND).send({ message: "No user with that Id" });
-      }
+    } else if (error.name === "DocumentNotFoundError") {
+      res.status(errors.NOT_FOUND).send({ message: "Item not found" });
     } else {
-      console.error(error);
+      console.error("Error retreiving user:", error);
       res
         .status(errors.SERVER_ERROR)
         .send({ message: "An error occured on the server" });
@@ -45,7 +43,7 @@ const createUser = async (req, res) => {
 
     res.status(201).send(savedUser);
   } catch (error) {
-    if ((error.name = "ValidationError")) {
+    if (error.name === "ValidationError") {
       res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating user" });

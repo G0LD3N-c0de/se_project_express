@@ -1,4 +1,5 @@
 const express = require("express");
+
 const app = express();
 const { PORT = 3001 } = process.env;
 const mongoose = require("mongoose");
@@ -20,9 +21,9 @@ app.use((req, res, next) => {
 app.use("/users", usersRouter);
 app.use("/items", clothingItemsRouter);
 
-// app.use((req, res) => {
-//   res.status(404).send({ message: "requested resource not found" });
-// });
+app.use((req, res) => {
+  res.status(404).send({ message: "requested resource not found" });
+});
 
 // Central error handling middleware
 app.use((err, req, res, next) => {
@@ -37,6 +38,8 @@ app.use((err, req, res, next) => {
       .status(errors.SERVER_ERROR)
       .send({ message: "An error occurred on the server" });
   }
+
+  next();
 });
 
 app.listen(PORT, () => {

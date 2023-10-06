@@ -6,6 +6,7 @@ const getItems = async (req, res) => {
     const items = await ClothingItem.find();
     res.send(items);
   } catch (error) {
+    console.error("Error retreiving item:", error);
     res
       .status(errors.SERVER_ERROR)
       .send({ error: "An error occured retrieving items" });
@@ -25,12 +26,12 @@ const postItem = async (req, res) => {
 
     res.status(201).send(savedItem);
   } catch (error) {
-    if ((error.name = "ValidationError")) {
+    if (error.name === "ValidationError") {
       res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating item" });
     } else {
-      console.error(error);
+      console.error("Error posting item", error);
       res
         .status(errors.SERVER_ERROR)
         .send({ message: "An error occured on the server" });
@@ -43,12 +44,14 @@ const deleteItem = async (req, res) => {
     const deletedItem = await ClothingItem.findByIdAndDelete(
       req.params.itemId,
     ).orFail();
-    res.status(204).send(deletedItem);
+    res.status(200).send(deletedItem);
   } catch (error) {
-    if ((error.name = "DocumentNotFoundError")) {
+    if (error.name === "DocumentNotFoundError") {
       res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+    } else if (error.name === "CastError") {
+      res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
     } else {
-      console.error(error);
+      console.error("Error deleting item:", error);
       res
         .status(errors.SERVER_ERROR)
         .send({ message: "An error occured on the server" });
@@ -65,7 +68,23 @@ const likeItem = (req, res) => {
       },
     },
     { new: true },
-  );
+  )
+    .orFail()
+    .then((updatedItem) => {
+      res.status(200).send(updatedItem);
+    })
+    .catch((error) => {
+      if (error.name === "CastError") {
+        res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
+      } else if (error.name === "DocumentNotFoundError") {
+        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+      } else {
+        console.error("Error updating item:", error);
+        res
+          .status(errors.SERVER_ERROR)
+          .send({ message: "An error occured within the server" });
+      }
+    });
 };
 
 const unlikeItem = (req, res) => {
@@ -75,7 +94,23 @@ const unlikeItem = (req, res) => {
       $pull: { likes: req.user._id },
     },
     { new: true },
-  );
+  )
+    .orFail()
+    .then((updatedItem) => {
+      res.status(200).send(updatedItem);
+    })
+    .catch((error) => {
+      if (error.name === "CastError") {
+        res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
+      } else if (error.name === "DocumentNotFoundError") {
+        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+      } else {
+        console.error("Error updating item:", error);
+        res
+          .status(errors.SERVER_ERROR)
+          .send({ message: "An error occurred on the server" });
+      }
+    });
 };
 
 module.exports = {
