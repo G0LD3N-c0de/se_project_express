@@ -1,5 +1,7 @@
 const User = require("../models/user");
 const errors = require("../utils/errors");
+const bcrypt = require("bcrypt");
+import { JWT_SECRET } from "../utils/config";
 
 const getUsers = async (req, res) => {
   try {
@@ -34,16 +36,31 @@ const getUser = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
+    const { name, avatar, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "Email is already in use" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({
-      name: req.body.name,
-      avatar: req.body.avatar,
+      name,
+      avatar,
+      email,
+      password: hashedPassword,
     });
 
-    const savedUser = await newUser.save();
+    const savedUser = await User.create(newUser);
 
     res.status(201).send(savedUser);
   } catch (error) {
-    if (error.name === "ValidationError") {
+    if (error.code === 11000) {
+      throw new Error("Email is already in use");
+    } else if (error.name === "ValidationError") {
       res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating user" });
@@ -56,8 +73,24 @@ const createUser = async (req, res) => {
   }
 };
 
+const loginUser = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.status(200).send(token);
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
+  loginUser,
 };
