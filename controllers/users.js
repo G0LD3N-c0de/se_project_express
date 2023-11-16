@@ -6,14 +6,13 @@ const { JWT_SECRET } = require("../utils/config");
 const getCurrentUser = async (req, res) => {
   try {
     const userId = req.user._id;
-
     const currentUser = await User.findById(userId);
 
     if (!currentUser) {
       return res.status(errors.NOT_FOUND).send({ message: "User not found" });
     }
-
     res.status(200).send(currentUser);
+    return currentUser;
   } catch (error) {
     res
       .status(errors.SERVER_ERROR)

@@ -1,5 +1,6 @@
 const ClothingItem = require("../models/clothingItem");
 const errors = require("../utils/errors");
+const { getCurrentUser } = require("./users");
 
 const getItems = async (req, res) => {
   try {
@@ -39,24 +40,59 @@ const postItem = async (req, res) => {
   }
 };
 
-const deleteItem = async (req, res) => {
-  try {
-    const deletedItem = await ClothingItem.findByIdAndDelete(
-      req.params.itemId,
-    ).orFail();
-    res.status(200).send(deletedItem);
-  } catch (error) {
-    if (error.name === "DocumentNotFoundError") {
-      res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-    } else if (error.name === "CastError") {
-      res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
-    } else {
-      console.error("Error deleting item:", error);
-      res
-        .status(errors.SERVER_ERROR)
-        .send({ message: "An error occured on the server" });
-    }
-  }
+// const deleteItem = async (req, res) => {
+//   try {
+//     const deletedItem = await ClothingItem.findByIdAndDelete(
+//       req.params.itemId,
+//     ).orFail();
+//     res.status(200).send(deletedItem);
+//   } catch (error) {
+//     if (error.name === "DocumentNotFoundError") {
+//       res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+//     } else if (error.name === "CastError") {
+//       res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
+//     } else {
+//       console.error("Error deleting item:", error);
+//       res
+//         .status(errors.SERVER_ERROR)
+//         .send({ message: "An error occured on the server" });
+//     }
+//   }
+// };
+
+const deleteItem = (req, res) => {
+  const currentUser = getCurrentUser();
+  const currentUserId = currentUser._id;
+
+  const toBeDeletedItem = ClothingItem.findById(req.params.itemId)
+    .then((item) => {
+      // Check for item in database
+      if (!item) {
+        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+      }
+      // Check current user to owner of item
+      if (currentUserId !== item.owner._id) {
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Current user did not create this item" });
+      }
+      // Remove item if current user is the owner of item
+      ClothingItem.deleteOne({ _id: item._id }).then(() => {
+        res.status(200).send(toBeDeletedItem);
+      });
+    })
+    .catch((error) => {
+      if (error.name === "DocumentNotFoundError") {
+        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+      } else if (error.name === "CastError") {
+        res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
+      } else {
+        console.error("Error deleting item:", error);
+        res
+          .status(errors.SERVER_ERROR)
+          .send({ message: "An error occured on the server" });
+      }
+    });
 };
 
 const likeItem = (req, res) => {
