@@ -1,38 +1,7 @@
 const User = require("../models/user");
 const errors = require("../utils/errors");
 const bcrypt = require("bcrypt");
-import { JWT_SECRET } from "../utils/config";
-
-// const getUsers = async (req, res) => {
-//   try {
-//     const users = await User.find();
-//     res.send(users);
-//   } catch (error) {
-//     res
-//       .status(errors.SERVER_ERROR)
-//       .send({ error: "An error occurred with fetching users" });
-//   }
-// };
-
-// const getUser = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.userId).orFail();
-//     res.send(user);
-//   } catch (error) {
-//     if (error.name === "CastError") {
-//       res
-//         .status(errors.BAD_REQUEST)
-//         .send({ message: "invalid data for request" });
-//     } else if (error.name === "DocumentNotFoundError") {
-//       res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-//     } else {
-//       console.error("Error retreiving user:", error);
-//       res
-//         .status(errors.SERVER_ERROR)
-//         .send({ message: "An error occured on the server" });
-//     }
-//   }
-// };
+const { JWT_SECRET } = require("../utils/config");
 
 const getCurrentUser = async (req, res) => {
   try {
@@ -46,11 +15,36 @@ const getCurrentUser = async (req, res) => {
 
     res.status(200).send(currentUser);
   } catch (error) {
-    console.error(error);
     res
       .status(errors.SERVER_ERROR)
       .send({ message: "An error occured on the server" });
   }
+};
+
+const updateUserProfile = (req, res) => {
+  const userId = req.user._id;
+  const updates = req.body;
+
+  User.findByIdAndUpdate(userId, updates, {
+    runValidators: true,
+    new: true,
+  })
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(errors.NOT_FOUND).send({ message: "User not found" });
+      }
+      res.status(200).send(updatedUser);
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid request" });
+      }
+      res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "An error occured on the server" });
+    });
 };
 
 const createUser = async (req, res) => {
@@ -111,4 +105,5 @@ module.exports = {
   createUser,
   loginUser,
   getCurrentUser,
+  updateUserProfile,
 };

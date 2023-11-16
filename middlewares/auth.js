@@ -1,5 +1,5 @@
-import { JWT_SECRET } from "../utils/config";
-import jwt from "jsonwebtoken";
+const { JWT_SECRET } = require("../utils/config");
+const jwt = require("jsonwebtoken");
 
 const authorization = (req, res, next) => {
   const token = req.headers.authorization;
@@ -17,4 +17,6 @@ const authorization = (req, res, next) => {
   }
 };
 
-export default authorization;
+module.exports = {
+  authorization,
+};

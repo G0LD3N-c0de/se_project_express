@@ -1,5 +1,5 @@
 const express = require("express");
-import authorization from "../middlewares/auth";
+const { authorization } = require("../middlewares/auth");
 
 const clothingItemsRouter = express.Router();
 const {
