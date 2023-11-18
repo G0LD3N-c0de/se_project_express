@@ -6,11 +6,11 @@ const { getCurrentUser } = require("./users");
 const getItems = async (req, res) => {
   try {
     const items = await ClothingItem.find();
-    res.send(items);
+    res.status(200).send(items);
   } catch (error) {
     res
       .status(errors.SERVER_ERROR)
-      .send({ error: "An error occured retrieving items" });
+      .send({ error: "An error occurred retrieving items" });
   }
 };
 
@@ -31,11 +31,10 @@ const postItem = async (req, res) => {
       res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating item" });
-    } else {
-      res
-        .status(errors.SERVER_ERROR)
-        .send({ message: "An error occured on the server" });
     }
+    res
+      .status(errors.SERVER_ERROR)
+      .send({ message: "An error occured on the server" });
   }
 };
 

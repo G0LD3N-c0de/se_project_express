@@ -3,9 +3,9 @@ const express = require("express");
 const usersRouter = express.Router();
 
 const { getCurrentUser, updateUserProfile } = require("../controllers/users");
-const authorization = require("../middlewares/auth");
+const authorizationMiddleware = require("../middlewares/auth");
 
-usersRouter.get("/me", authorization, getCurrentUser);
-usersRouter.patch("/me", authorization, updateUserProfile);
+usersRouter.get("/me", authorizationMiddleware, getCurrentUser);
+usersRouter.patch("/me", authorizationMiddleware, updateUserProfile);
 
 module.exports = usersRouter;

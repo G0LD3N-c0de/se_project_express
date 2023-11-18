@@ -52,11 +52,15 @@ const createUser = async (req, res) => {
   try {
     const { name, avatar, email, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    if (!email) {
       return res
         .status(errors.BAD_REQUEST)
-        .send({ message: "Email is already in use" });
+        .send({ message: "No email was provided" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).send({ message: "Email is already in use" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -70,15 +74,21 @@ const createUser = async (req, res) => {
 
     const savedUser = await User.create(newUser);
 
-    return res.status(201).send(savedUser);
+    const userResponse = {
+      name: savedUser.name,
+      _id: savedUser._id,
+      email: savedUser.email,
+      avatar: savedUser.avatar,
+      __v: savedUser.__v,
+    };
+
+    return res.status(201).send(userResponse);
   } catch (error) {
     if (error.code === 11000) {
-      return res
-        .status(errors.BAD_REQUEST)
-        .send({ message: "Email already in use" });
+      res.status(409).send({ message: "Email already in use" });
     }
     if (error.name === "ValidationError") {
-      return res
+      res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating user" });
     }
@@ -97,9 +107,12 @@ const loginUser = async (req, res) => {
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
       expiresIn: "7d",
     });
-    return res.status(200).send(token);
+    // set content header to JSON
+    res.setHeader("Content-type", "application/json");
+
+    res.status(200).send(token);
   } catch (err) {
-    return res.status(401).send({ message: err.message });
+    res.status(errors.BAD_REQUEST).send({ message: err.message });
   }
 };
 

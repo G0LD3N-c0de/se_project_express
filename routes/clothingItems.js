@@ -1,6 +1,6 @@
 const express = require("express");
 
-const authorization = require("../middlewares/auth");
+const authorizationMiddleware = require("../middlewares/auth");
 
 const clothingItemsRouter = express.Router();
 const {
@@ -12,9 +12,13 @@ const {
 } = require("../controllers/clothingItems");
 
 clothingItemsRouter.get("/", getItems);
-clothingItemsRouter.post("/", authorization, postItem);
-clothingItemsRouter.delete("/:itemId", authorization, deleteItem);
-clothingItemsRouter.put("/:itemId/likes", authorization, likeItem);
-clothingItemsRouter.delete("/:itemId/likes", authorization, unlikeItem);
+clothingItemsRouter.post("/", authorizationMiddleware, postItem);
+clothingItemsRouter.delete("/:itemId", authorizationMiddleware, deleteItem);
+clothingItemsRouter.put("/:itemId/likes", authorizationMiddleware, likeItem);
+clothingItemsRouter.delete(
+  "/:itemId/likes",
+  authorizationMiddleware,
+  unlikeItem,
+);
 
 module.exports = clothingItemsRouter;

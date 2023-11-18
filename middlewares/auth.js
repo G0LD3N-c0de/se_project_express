@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const { JWT_SECRET } = require("../utils/config");
 
-module.exports = (req, res, next) => {
+const authorizationMiddleware = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startWith("Bearer ")) {
@@ -22,3 +22,5 @@ module.exports = (req, res, next) => {
 
   return next();
 };
+
+module.exports = authorizationMiddleware;
