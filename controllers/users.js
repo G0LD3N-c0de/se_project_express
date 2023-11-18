@@ -1,6 +1,8 @@
+const bcrypt = require("bcrypt");
+
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const errors = require("../utils/errors");
-const bcrypt = require("bcrypt");
 const { JWT_SECRET } = require("../utils/config");
 
 const getCurrentUser = async (req, res) => {
@@ -14,7 +16,7 @@ const getCurrentUser = async (req, res) => {
     res.status(200).send(currentUser);
     return currentUser;
   } catch (error) {
-    res
+    return res
       .status(errors.SERVER_ERROR)
       .send({ message: "An error occured on the server" });
   }
@@ -32,7 +34,7 @@ const updateUserProfile = (req, res) => {
       if (!updatedUser) {
         return res.status(errors.NOT_FOUND).send({ message: "User not found" });
       }
-      res.status(200).send(updatedUser);
+      return res.status(200).send(updatedUser);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -40,7 +42,7 @@ const updateUserProfile = (req, res) => {
           .status(errors.BAD_REQUEST)
           .send({ message: "Invalid request" });
       }
-      res
+      return res
         .status(errors.SERVER_ERROR)
         .send({ message: "An error occured on the server" });
     });
@@ -68,36 +70,37 @@ const createUser = async (req, res) => {
 
     const savedUser = await User.create(newUser);
 
-    res.status(201).send(savedUser);
+    return res.status(201).send(savedUser);
   } catch (error) {
     if (error.code === 11000) {
-      throw new Error("Email is already in use");
-    } else if (error.name === "ValidationError") {
-      res
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "Email already in use" });
+    }
+    if (error.name === "ValidationError") {
+      return res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating user" });
-    } else {
-      console.error(error);
-      res
-        .status(errors.SERVER_ERROR)
-        .send({ message: "An error occured on the server" });
     }
+    return res
+      .status(errors.SERVER_ERROR)
+      .send({ message: "An error occured on the server" });
   }
 };
 
-const loginUser = (req, res) => {
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
-      res.status(200).send(token);
-    })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
+  try {
+    const user = await User.findUserByCredentials(email, password);
+
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      expiresIn: "7d",
     });
+    return res.status(200).send(token);
+  } catch (err) {
+    return res.status(401).send({ message: err.message });
+  }
 };
 
 module.exports = {

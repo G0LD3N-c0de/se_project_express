@@ -1,5 +1,7 @@
 const express = require("express");
 
+const cors = require("cors");
+
 const app = express();
 const { PORT = 3001 } = process.env;
 const mongoose = require("mongoose");
@@ -11,6 +13,8 @@ const errors = require("./utils/errors");
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
 app.use(express.json());
+
+app.use(cors());
 
 // ----- ROUTES ----- //
 app.use("/items", clothingItemsRouter);
@@ -24,8 +28,6 @@ app.use((req, res) => {
 
 // Central error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err);
-
   if (err.name === "DocumentNotFoundError") {
     res.status(errors.NOT_FOUND).send({ message: "Item not found" });
   } else {
@@ -37,6 +39,4 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
-  console.log(`App is listening to ${PORT}`);
-});
+app.listen(PORT);

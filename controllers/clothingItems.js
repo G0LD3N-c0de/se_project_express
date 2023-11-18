@@ -1,4 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
+
 const errors = require("../utils/errors");
 const { getCurrentUser } = require("./users");
 
@@ -7,7 +8,6 @@ const getItems = async (req, res) => {
     const items = await ClothingItem.find();
     res.send(items);
   } catch (error) {
-    console.error("Error retreiving item:", error);
     res
       .status(errors.SERVER_ERROR)
       .send({ error: "An error occured retrieving items" });
@@ -32,7 +32,6 @@ const postItem = async (req, res) => {
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating item" });
     } else {
-      console.error("Error posting item", error);
       res
         .status(errors.SERVER_ERROR)
         .send({ message: "An error occured on the server" });
@@ -40,59 +39,40 @@ const postItem = async (req, res) => {
   }
 };
 
-// const deleteItem = async (req, res) => {
-//   try {
-//     const deletedItem = await ClothingItem.findByIdAndDelete(
-//       req.params.itemId,
-//     ).orFail();
-//     res.status(200).send(deletedItem);
-//   } catch (error) {
-//     if (error.name === "DocumentNotFoundError") {
-//       res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-//     } else if (error.name === "CastError") {
-//       res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
-//     } else {
-//       console.error("Error deleting item:", error);
-//       res
-//         .status(errors.SERVER_ERROR)
-//         .send({ message: "An error occured on the server" });
-//     }
-//   }
-// };
-
-const deleteItem = (req, res) => {
+const deleteItem = async (req, res) => {
   const currentUser = getCurrentUser();
   const currentUserId = currentUser._id;
 
-  const toBeDeletedItem = ClothingItem.findById(req.params.itemId)
-    .then((item) => {
-      // Check for item in database
-      if (!item) {
-        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-      }
-      // Check current user to owner of item
-      if (currentUserId !== item.owner._id) {
-        return res
-          .status(errors.BAD_REQUEST)
-          .send({ message: "Current user did not create this item" });
-      }
-      // Remove item if current user is the owner of item
-      ClothingItem.deleteOne({ _id: item._id }).then(() => {
-        res.status(200).send(toBeDeletedItem);
-      });
-    })
-    .catch((error) => {
-      if (error.name === "DocumentNotFoundError") {
-        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-      } else if (error.name === "CastError") {
-        res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
-      } else {
-        console.error("Error deleting item:", error);
-        res
-          .status(errors.SERVER_ERROR)
-          .send({ message: "An error occured on the server" });
-      }
+  try {
+    const toBeDeletedItem = await ClothingItem.findById(req.params.itemId);
+
+    if (!toBeDeletedItem) {
+      return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+    }
+    // Check if the current user is the owner of the item to be deleted
+    if (currentUserId !== toBeDeletedItem.owner._id) {
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "Current user did not create this item" });
+    }
+
+    const deletedItem = await ClothingItem.deleteOne({
+      _id: toBeDeletedItem._id,
     });
+    return res.status(200).send(deletedItem);
+  } catch (error) {
+    if (error.name === "DocumentNotFoundError") {
+      return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+    }
+    if (error.name === "CastError") {
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: "Invalid request" });
+    }
+    return res
+      .status(errors.SERVER_ERROR)
+      .send({ message: "An error occured on the server" });
+  }
 };
 
 const likeItem = (req, res) => {
@@ -115,7 +95,6 @@ const likeItem = (req, res) => {
       } else if (error.name === "DocumentNotFoundError") {
         res.status(errors.NOT_FOUND).send({ message: "Item not found" });
       } else {
-        console.error("Error updating item:", error);
         res
           .status(errors.SERVER_ERROR)
           .send({ message: "An error occured within the server" });
@@ -141,7 +120,6 @@ const unlikeItem = (req, res) => {
       } else if (error.name === "DocumentNotFoundError") {
         res.status(errors.NOT_FOUND).send({ message: "Item not found" });
       } else {
-        console.error("Error updating item:", error);
         res
           .status(errors.SERVER_ERROR)
           .send({ message: "An error occurred on the server" });

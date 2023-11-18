@@ -1,22 +1,24 @@
-const { JWT_SECRET } = require("../utils/config");
 const jwt = require("jsonwebtoken");
 
-const authorization = (req, res, next) => {
-  const token = req.headers.authorization;
+const { JWT_SECRET } = require("../utils/config");
 
-  if (!token) {
-    return res.status(401).send({ message: "No token provided" });
+module.exports = (req, res, next) => {
+  const { authorization } = req.headers;
+
+  if (!authorization || !authorization.startWith("Bearer ")) {
+    return res.status(401).send({ message: "Authorization required" });
   }
+
+  const token = authorization.replace("Bearer ", "");
+  let payload;
 
   try {
-    const payload = jwt.verify(token.replace("Bearer ", ""), JWT_SECRET);
-    req.user = payload;
-    next();
-  } catch (error) {
-    return res.status(401).send({ message: "Invalid token" });
+    payload = jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    return res.status(401).send({ message: "Authorization required" });
   }
-};
 
-module.exports = {
-  authorization,
+  req.user = payload;
+
+  return next();
 };

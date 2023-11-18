@@ -1,5 +1,6 @@
 const express = require("express");
-const { authorization } = require("../middlewares/auth");
+
+const authorization = require("../middlewares/auth");
 
 const clothingItemsRouter = express.Router();
 const {
