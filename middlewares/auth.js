@@ -5,7 +5,7 @@ const { JWT_SECRET } = require("../utils/config");
 const authorizationMiddleware = (req, res, next) => {
   const { authorization } = req.headers;
 
-  if (!authorization || !authorization.startWith("Bearer ")) {
+  if (!authorization || !authorization.startsWith("Bearer ")) {
     return res.status(401).send({ message: "Authorization required" });
   }
 
@@ -15,6 +15,7 @@ const authorizationMiddleware = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
+    console.error(err);
     return res.status(401).send({ message: "Authorization required" });
   }
 

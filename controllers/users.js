@@ -84,6 +84,7 @@ const createUser = async (req, res) => {
 
     return res.status(201).send(userResponse);
   } catch (error) {
+    console.error(error);
     if (error.code === 11000) {
       res.status(409).send({ message: "Email already in use" });
     }
@@ -112,6 +113,7 @@ const loginUser = async (req, res) => {
 
     res.status(200).send(token);
   } catch (err) {
+    console.error(err);
     res.status(errors.BAD_REQUEST).send({ message: err.message });
   }
 };

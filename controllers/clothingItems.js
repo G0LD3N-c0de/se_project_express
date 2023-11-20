@@ -8,6 +8,7 @@ const getItems = async (req, res) => {
     const items = await ClothingItem.find();
     res.status(200).send(items);
   } catch (error) {
+    console.error(SyntaxError);
     res
       .status(errors.SERVER_ERROR)
       .send({ error: "An error occurred retrieving items" });
@@ -27,6 +28,7 @@ const postItem = async (req, res) => {
 
     res.status(201).send(savedItem);
   } catch (error) {
+    console.error(error);
     if (error.name === "ValidationError") {
       res
         .status(errors.BAD_REQUEST)
@@ -39,10 +41,12 @@ const postItem = async (req, res) => {
 };
 
 const deleteItem = async (req, res) => {
-  const currentUser = getCurrentUser();
-  const currentUserId = currentUser._id;
-
   try {
+    const currentUser = await getCurrentUser();
+    console.log(currentUser);
+    const currentUserId = currentUser._id;
+    console.log(currentUserId);
+
     const toBeDeletedItem = await ClothingItem.findById(req.params.itemId);
 
     if (!toBeDeletedItem) {
@@ -116,13 +120,13 @@ const unlikeItem = (req, res) => {
     .catch((error) => {
       if (error.name === "CastError") {
         res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
-      } else if (error.name === "DocumentNotFoundError") {
-        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-      } else {
-        res
-          .status(errors.SERVER_ERROR)
-          .send({ message: "An error occurred on the server" });
       }
+      if (error.name === "DocumentNotFoundError") {
+        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+      }
+      res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
     });
 };
 
