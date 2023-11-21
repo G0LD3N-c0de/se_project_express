@@ -25,7 +25,7 @@ const postItem = async (req, res) => {
 
     const savedItem = await newItem.save();
 
-    res.status(201).send(savedItem);
+    return res.status(201).send(savedItem);
   } catch (error) {
     console.error(error);
     if (error.name === "ValidationError") {
@@ -33,7 +33,7 @@ const postItem = async (req, res) => {
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating item" });
     }
-    res
+    return res
       .status(errors.SERVER_ERROR)
       .send({ message: "An error occured on the server" });
   }
