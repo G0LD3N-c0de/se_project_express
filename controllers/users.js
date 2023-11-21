@@ -62,7 +62,7 @@ const createUser = async (req, res) => {
       return res.status(409).send({ message: "Email is already in use" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = bcrypt.hash(password, 10);
 
     const newUser = new User({
       name,
@@ -85,10 +85,10 @@ const createUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     if (error.code === 11000) {
-      res.status(409).send({ message: "Email already in use" });
+      return res.status(409).send({ message: "Email already in use" });
     }
     if (error.name === "ValidationError") {
-      res
+      return res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating user" });
     }

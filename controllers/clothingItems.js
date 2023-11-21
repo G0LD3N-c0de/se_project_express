@@ -29,7 +29,7 @@ const postItem = async (req, res) => {
   } catch (error) {
     console.error(error);
     if (error.name === "ValidationError") {
-      res
+      return res
         .status(errors.BAD_REQUEST)
         .send({ message: "Invalid data for creating item" });
     }
@@ -91,14 +91,16 @@ const likeItem = (req, res) => {
     })
     .catch((error) => {
       if (error.name === "CastError") {
-        res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
-      } else if (error.name === "DocumentNotFoundError") {
-        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-      } else {
-        res
-          .status(errors.SERVER_ERROR)
-          .send({ message: "An error occured within the server" });
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid request" });
       }
+      if (error.name === "DocumentNotFoundError") {
+        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res
+        .status(errors.SERVER_ERROR)
+        .send({ message: "An error occured within the server" });
     });
 };
 
@@ -116,12 +118,14 @@ const unlikeItem = (req, res) => {
     })
     .catch((error) => {
       if (error.name === "CastError") {
-        res.status(errors.BAD_REQUEST).send({ message: "Invalid request" });
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid request" });
       }
       if (error.name === "DocumentNotFoundError") {
-        res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
       }
-      res
+      return res
         .status(errors.SERVER_ERROR)
         .send({ message: "An error occurred on the server" });
     });
