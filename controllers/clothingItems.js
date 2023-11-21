@@ -1,7 +1,6 @@
 const ClothingItem = require("../models/clothingItem");
 
 const errors = require("../utils/errors");
-const { getCurrentUser } = require("./users");
 
 const getItems = async (req, res) => {
   try {
@@ -42,10 +41,7 @@ const postItem = async (req, res) => {
 
 const deleteItem = async (req, res) => {
   try {
-    const currentUser = await getCurrentUser();
-    console.log(currentUser);
-    const currentUserId = currentUser._id;
-    console.log(currentUserId);
+    const currentUserId = req.user._id;
 
     const toBeDeletedItem = await ClothingItem.findById(req.params.itemId);
 
@@ -53,7 +49,7 @@ const deleteItem = async (req, res) => {
       return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
     }
     // Check if the current user is the owner of the item to be deleted
-    if (currentUserId !== toBeDeletedItem.owner._id) {
+    if (currentUserId !== toBeDeletedItem.owner.valueOf()) {
       return res
         .status(errors.BAD_REQUEST)
         .send({ message: "Current user did not create this item" });
@@ -64,6 +60,7 @@ const deleteItem = async (req, res) => {
     });
     return res.status(200).send(deletedItem);
   } catch (error) {
+    console.error(error);
     if (error.name === "DocumentNotFoundError") {
       return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
     }

@@ -13,8 +13,7 @@ const getCurrentUser = async (req, res) => {
     if (!currentUser) {
       return res.status(errors.NOT_FOUND).send({ message: "User not found" });
     }
-    res.status(200).send(currentUser);
-    return currentUser;
+    return res.status(200).send(currentUser);
   } catch (error) {
     return res
       .status(errors.SERVER_ERROR)

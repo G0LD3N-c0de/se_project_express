@@ -18,9 +18,7 @@ const authorizationMiddleware = (req, res, next) => {
     console.error(err);
     return res.status(401).send({ message: "Authorization required" });
   }
-
   req.user = payload;
-
   return next();
 };
 

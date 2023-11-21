@@ -17,8 +17,8 @@ app.use(express.json());
 app.use(cors());
 
 // ----- ROUTES ----- //
-app.use("/items", clothingItemsRouter);
 app.use("/users", usersRouter);
+app.use("/items", clothingItemsRouter);
 app.use("/", indexRouter);
 // ----- END ROUTES ----- //
 
