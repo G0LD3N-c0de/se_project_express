@@ -62,7 +62,7 @@ const createUser = async (req, res) => {
       return res.status(409).send({ message: "Email is already in use" });
     }
 
-    const hashedPassword = bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       name,
