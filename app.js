@@ -20,9 +20,9 @@ app.use(cors());
 
 // ----- Security ----- //
 app.use(helmet());
-helmet.contentSecurityPolicy();
-helmet.hsts();
-helmet.frameguard();
+app.use(helmet.contentSecurityPolicy());
+app.use(helmet.hsts());
+app.use(helmet.frameguard());
 
 // ----- Routes ----- //
 app.use("/users", usersRouter);
