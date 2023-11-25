@@ -5,7 +5,7 @@ const errors = require("../utils/errors");
 const getItems = async (req, res) => {
   try {
     const items = await ClothingItem.find();
-    res.status(200).send(items);
+    res.send(items);
   } catch (error) {
     console.error(SyntaxError);
     res
@@ -51,14 +51,14 @@ const deleteItem = async (req, res) => {
     // Check if the current user is the owner of the item to be deleted
     if (currentUserId !== toBeDeletedItem.owner.valueOf()) {
       return res
-        .status(errors.BAD_REQUEST)
+        .status(errors.FORBIDDEN)
         .send({ message: "Current user did not create this item" });
     }
 
     const deletedItem = await ClothingItem.deleteOne({
       _id: toBeDeletedItem._id,
     });
-    return res.status(200).send(deletedItem);
+    return res.send(deletedItem);
   } catch (error) {
     console.error(error);
     if (error.name === "DocumentNotFoundError") {
@@ -87,7 +87,7 @@ const likeItem = (req, res) => {
   )
     .orFail()
     .then((updatedItem) => {
-      res.status(200).send(updatedItem);
+      res.send(updatedItem);
     })
     .catch((error) => {
       if (error.name === "CastError") {
@@ -114,7 +114,7 @@ const unlikeItem = (req, res) => {
   )
     .orFail()
     .then((updatedItem) => {
-      res.status(200).send(updatedItem);
+      res.send(updatedItem);
     })
     .catch((error) => {
       if (error.name === "CastError") {

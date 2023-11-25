@@ -13,7 +13,7 @@ const getCurrentUser = async (req, res) => {
     if (!currentUser) {
       return res.status(errors.NOT_FOUND).send({ message: "User not found" });
     }
-    return res.status(200).send(currentUser);
+    return res.send(currentUser);
   } catch (error) {
     return res
       .status(errors.SERVER_ERROR)
@@ -33,7 +33,7 @@ const updateUserProfile = (req, res) => {
       if (!updatedUser) {
         return res.status(errors.NOT_FOUND).send({ message: "User not found" });
       }
-      return res.status(200).send(updatedUser);
+      return res.send(updatedUser);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -59,7 +59,9 @@ const createUser = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).send({ message: "Email is already in use" });
+      return res
+        .status(errors.CONFLICT)
+        .send({ message: "Email is already in use" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -85,7 +87,9 @@ const createUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     if (error.code === 11000) {
-      return res.status(409).send({ message: "Email already in use" });
+      return res
+        .status(errors.CONFLICT)
+        .send({ message: "Email already in use" });
     }
     if (error.name === "ValidationError") {
       return res
@@ -107,13 +111,16 @@ const loginUser = async (req, res) => {
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
       expiresIn: "7d",
     });
-    // set content header to JSON
-    res.setHeader("Content-type", "application/json");
 
-    res.status(200).send(token);
+    res.send({ token });
   } catch (err) {
+    if (err.message === "Invalid email or password") {
+      res.status(errors.UNAUTHORIZED).send({ message: err.message });
+    }
     console.error(err);
-    res.status(errors.BAD_REQUEST).send({ message: err.message });
+    res
+      .status(errors.SERVER_ERROR)
+      .send({ message: "A problem occured on the server" });
   }
 };
 

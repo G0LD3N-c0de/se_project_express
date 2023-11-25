@@ -1,8 +1,10 @@
 const express = require("express");
 
 const cors = require("cors");
+const helmet = require("helmet");
 
 const app = express();
+
 const { PORT = 3001 } = process.env;
 const mongoose = require("mongoose");
 const clothingItemsRouter = require("./routes/clothingItems");
@@ -16,27 +18,34 @@ app.use(express.json());
 
 app.use(cors());
 
-// ----- ROUTES ----- //
+// ----- Security ----- //
+app.use(helmet());
+helmet.contentSecurityPolicy();
+helmet.hsts();
+helmet.frameguard();
+
+// ----- Routes ----- //
 app.use("/users", usersRouter);
 app.use("/items", clothingItemsRouter);
 app.use("/", indexRouter);
-// ----- END ROUTES ----- //
 
 app.use((req, res) => {
-  res.status(404).send({ message: "requested resource not found" });
+  res
+    .status(errors.NOT_FOUND)
+    .send({ message: "requested resource not found" });
 });
 
 // Central error handling middleware
-app.use((err, req, res, next) => {
-  if (err.name === "DocumentNotFoundError") {
-    res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-  } else {
-    res
-      .status(errors.SERVER_ERROR)
-      .send({ message: "An error occurred on the server" });
-  }
+// app.use((err, req, res, next) => {
+//   if (err.name === "DocumentNotFoundError") {
+//     res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+//   } else {
+//     res
+//       .status(errors.SERVER_ERROR)
+//       .send({ message: "An error occurred on the server" });
+//   }
 
-  next();
-});
+//   next();
+// });
 
 app.listen(PORT);
