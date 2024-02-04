@@ -2,26 +2,28 @@ const bcrypt = require("bcrypt");
 
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const errors = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const NotFoundError = require("../errors/NotFoundError");
+const UnauthorizedError = require("../errors/UnauthorizedError");
+const BadRequestError = require("../errors/BadRequestError");
+const ConflictError = require("../errors/ConflictError");
 
-const getCurrentUser = async (req, res) => {
+const getCurrentUser = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const currentUser = await User.findById(userId);
 
     if (!currentUser) {
-      return res.status(errors.NOT_FOUND).send({ message: "User not found" });
+      throw new NotFoundError("No user with matching ID found");
     }
+
     return res.send(currentUser);
-  } catch (error) {
-    return res
-      .status(errors.SERVER_ERROR)
-      .send({ message: "An error occured on the server" });
+  } catch (err) {
+    next(err);
   }
 };
 
-const updateUserProfile = (req, res) => {
+const updateUserProfile = (req, res, next) => {
   const userId = req.user._id;
   const updates = req.body;
 
@@ -31,37 +33,29 @@ const updateUserProfile = (req, res) => {
   })
     .then((updatedUser) => {
       if (!updatedUser) {
-        return res.status(errors.NOT_FOUND).send({ message: "User not found" });
+        throw new NotFoundError("User not found");
       }
       return res.send(updatedUser);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res
-          .status(errors.BAD_REQUEST)
-          .send({ message: "Invalid request" });
-      }
-      return res
-        .status(errors.SERVER_ERROR)
-        .send({ message: "An error occured on the server" });
+        next(new BadRequestError("Invalid request"));
+      } else next(err);
     });
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
     const { name, avatar, email, password } = req.body;
 
     if (!email) {
-      return res
-        .status(errors.BAD_REQUEST)
-        .send({ message: "No email was provided" });
+      throw new BadRequestError("No email was provided");
     }
 
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-      return res
-        .status(errors.CONFLICT)
-        .send({ message: "Email is already in use" });
+      throw new ConflictError("Email is already in use");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -84,25 +78,18 @@ const createUser = async (req, res) => {
     };
 
     return res.status(201).send(userResponse);
-  } catch (error) {
-    console.error(error);
-    if (error.code === 11000) {
-      return res
-        .status(errors.CONFLICT)
-        .send({ message: "Email already in use" });
+  } catch (err) {
+    if (err.code === 11000) {
+      next(new ConflictError("Email already in use"));
+    } else if (err.name === "ValidationError") {
+      next(new BadRequestError("Invalid data for creating user"));
+    } else {
+      next(err);
     }
-    if (error.name === "ValidationError") {
-      return res
-        .status(errors.BAD_REQUEST)
-        .send({ message: "Invalid data for creating user" });
-    }
-    return res
-      .status(errors.SERVER_ERROR)
-      .send({ message: "An error occured on the server" });
   }
 };
 
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -115,12 +102,10 @@ const loginUser = async (req, res) => {
     res.send({ token });
   } catch (err) {
     if (err.message === "Invalid email or password") {
-      res.status(errors.UNAUTHORIZED).send({ message: err.message });
+      next(new UnauthorizedError("Invalid email or password"));
+    } else {
+      next(err);
     }
-    console.error(err);
-    res
-      .status(errors.SERVER_ERROR)
-      .send({ message: "A problem occured on the server" });
   }
 };
 

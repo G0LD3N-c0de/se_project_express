@@ -11,6 +11,7 @@ const clothingItemsRouter = require("./routes/clothingItems");
 const usersRouter = require("./routes/users");
 const indexRouter = require("./routes/index");
 const errors = require("./utils/errors");
+const errorHandler = require("./middlewares/errorHandler");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
@@ -36,16 +37,6 @@ app.use((req, res) => {
 });
 
 // Central error handling middleware
-// app.use((err, req, res, next) => {
-//   if (err.name === "DocumentNotFoundError") {
-//     res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-//   } else {
-//     res
-//       .status(errors.SERVER_ERROR)
-//       .send({ message: "An error occurred on the server" });
-//   }
-
-//   next();
-// });
+app.use(errorHandler);
 
 app.listen(PORT);
