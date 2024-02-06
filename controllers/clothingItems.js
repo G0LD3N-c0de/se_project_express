@@ -1,6 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
 
-const errors = require("../utils/errors");
 const NotFoundError = require("../errors/NotFoundError");
 const BadRequestError = require("../errors/BadRequestError");
 const ForbiddenError = require("../errors/ForbiddenError");
@@ -61,7 +60,7 @@ const deleteItem = async (req, res, next) => {
   } catch (err) {
     if (err.name === "DocumentNotFoundError") {
       next(new NotFoundError("Item not found"));
-    } else if (error.name === "CastError") {
+    } else if (err.name === "CastError") {
       next(new BadRequestError("Invalid request"));
     } else {
       next(err);

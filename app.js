@@ -10,8 +10,8 @@ const mongoose = require("mongoose");
 const clothingItemsRouter = require("./routes/clothingItems");
 const usersRouter = require("./routes/users");
 const indexRouter = require("./routes/index");
-const errors = require("./utils/errors");
 const errorHandler = require("./middlewares/errorHandler");
+const { errors } = require("celebrate");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
@@ -35,6 +35,9 @@ app.use((req, res) => {
     .status(errors.NOT_FOUND)
     .send({ message: "requested resource not found" });
 });
+
+// Celebrate error handling middleware
+app.use(errors());
 
 // Central error handling middleware
 app.use(errorHandler);

@@ -2,6 +2,8 @@ const express = require("express");
 
 const authorizationMiddleware = require("../middlewares/auth");
 
+const { validateCardBody } = require("../middlewares/validation");
+
 const clothingItemsRouter = express.Router();
 const {
   getItems,
@@ -12,7 +14,12 @@ const {
 } = require("../controllers/clothingItems");
 
 clothingItemsRouter.get("/", getItems);
-clothingItemsRouter.post("/", authorizationMiddleware, postItem);
+clothingItemsRouter.post(
+  "/",
+  validateCardBody,
+  authorizationMiddleware,
+  postItem,
+);
 clothingItemsRouter.delete("/:itemId", authorizationMiddleware, deleteItem);
 clothingItemsRouter.put("/:itemId/likes", authorizationMiddleware, likeItem);
 clothingItemsRouter.delete(
