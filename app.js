@@ -12,6 +12,7 @@ const usersRouter = require("./routes/users");
 const indexRouter = require("./routes/index");
 const errorHandler = require("./middlewares/errorHandler");
 const { errors } = require("celebrate");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
@@ -25,10 +26,16 @@ app.use(helmet.contentSecurityPolicy());
 app.use(helmet.hsts());
 app.use(helmet.frameguard());
 
+// Request logger (Placement: before routes)
+app.use(requestLogger);
+
 // ----- Routes ----- //
 app.use("/users", usersRouter);
 app.use("/items", clothingItemsRouter);
 app.use("/", indexRouter);
+
+// Error logger (Placement: after routes but before error handling)
+app.use(errorLogger);
 
 app.use((req, res) => {
   res
