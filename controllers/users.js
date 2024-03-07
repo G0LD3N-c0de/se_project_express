@@ -82,6 +82,7 @@ const createUser = async (req, res, next) => {
     if (err.code === 11000) {
       next(new ConflictError("Email already in use"));
     } else if (err.name === "ValidationError") {
+      console.error(err);
       next(new BadRequestError("Invalid data for creating user"));
     } else {
       next(err);
