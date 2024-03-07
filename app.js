@@ -7,11 +7,11 @@ const app = express();
 
 const { PORT = 3001 } = process.env;
 const mongoose = require("mongoose");
+const { errors } = require("celebrate");
 const clothingItemsRouter = require("./routes/clothingItems");
 const usersRouter = require("./routes/users");
 const indexRouter = require("./routes/index");
 const errorHandler = require("./middlewares/errorHandler");
-const { errors } = require("celebrate");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
