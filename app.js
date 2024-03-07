@@ -29,6 +29,12 @@ app.use(helmet.frameguard());
 // Request logger (Placement: before routes)
 app.use(requestLogger);
 
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 // ----- Routes ----- //
 app.use("/users", usersRouter);
 app.use("/items", clothingItemsRouter);
