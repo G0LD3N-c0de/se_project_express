@@ -21,7 +21,7 @@ module.exports.validateCardBody = celebrate({
       "string.uri": 'the "imageUrl" field must be a valid url',
     }),
 
-    weather: Joi.string().required.messages({
+    weather: Joi.string().required().messages({
       "string.empty": 'The "weather" field must be selected',
     }),
   }),
