@@ -5,8 +5,6 @@ const helmet = require("helmet");
 
 const app = express();
 
-require("dotenv").config();
-
 const { PORT = 3001 } = process.env;
 const mongoose = require("mongoose");
 const { errors } = require("celebrate");
