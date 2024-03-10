@@ -21,6 +21,8 @@ const getCurrentUser = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
+  return null;
 };
 
 const updateUserProfile = (req, res, next) => {
@@ -87,6 +89,8 @@ const createUser = async (req, res, next) => {
       next(err);
     }
   }
+
+  return null;
 };
 
 const loginUser = async (req, res, next) => {

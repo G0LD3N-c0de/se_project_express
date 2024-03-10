@@ -37,6 +37,8 @@ const postItem = async (req, res, next) => {
       next(err);
     }
   }
+
+  return null;
 };
 
 const deleteItem = async (req, res, next) => {
@@ -66,6 +68,8 @@ const deleteItem = async (req, res, next) => {
       next(err);
     }
   }
+
+  return null;
 };
 
 const likeItem = (req, res, next) => {
