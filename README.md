@@ -4,7 +4,7 @@ This project is the back end to a front-end app called WTWR. It will store user 
 
 ## Running the Project
 
-Click on www.StyleCast.twilightparadox.com to be taken to the web application currently hosted on Google Cloud.
+Click on www.StyleCast.twilightparadox.com to be taken to the web application currently hosted on Google Cloud. Twilightparadox is a free domain provided by Free DNS.
 
 ### Technologies
 
