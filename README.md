@@ -12,3 +12,4 @@ This project uses express, mongoDB, Postman and more.
 
 #### DEMO
 
+Click https://www.loom.com/share/7269835c9d3b4da9a61db52767d9099d to see a demo of my project hosted on loom.
