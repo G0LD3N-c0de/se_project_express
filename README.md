@@ -4,14 +4,11 @@ This project is the back end to a front-end app called WTWR. It will store user 
 
 ## Running the Project
 
-`npm run start` — to launch the server
-
-`npm run dev` — to launch the server with the hot reload feature
+Click on www.StyleCast.twilightparadox.com to be taken to the web application currently hosted on Google Cloud.
 
 ### Technologies
 
 This project uses express, mongoDB, Postman and more.
 
-#### Domain Name
+#### DEMO
 
-www.StyleCast.twilightparadox.com
